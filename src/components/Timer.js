@@ -1,10 +1,10 @@
 const Timer = ({ timeLeft }) => {
     return (
-        <p
-            style={{
-                color: timeLeft <= 5 ? "red" : "black"
-            }}
-        >
+        <p className={
+            timeLeft <= 5
+                ? "timer timer-warning"
+                : "timer"
+        }>
             Còn {timeLeft} giây
         </p>
     );

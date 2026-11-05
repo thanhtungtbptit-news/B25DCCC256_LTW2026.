@@ -9,41 +9,33 @@ const ScoreBoard = ({
     );
 
     return (
-        <div>
-            <p>Điểm: {score}</p>    
+        <div className="score-board">
+            <h3>Điểm: {score}</h3>
 
-            <div
-                style={{
-                    display: "flex",
-                    gap: "5px",
-                    flexWrap: "wrap"
-                }}
-            >
+            <div className="score-board-numbers">
                 {questionNumbers.map((number, index) => {
                     const answer = answers.find(
                         (item) => item.id === number
                     );
 
-                    const boxStyle = {
-                        width: "30px",
-                        height: "30px",
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        backgroundColor:
-                            answer && answer.correct
-                                ? "green"
-                                : "gray"
-                    };
+                    let className = "score-board-cell";
+
+                    if (answer && answer.correct) {
+                        className += " score-correct";
+                    }
+
+                    if (answer && answer.rescued) {
+                        className += " score-rescued";
+                    }
 
                     if (index === currentIndex) {
-                        boxStyle.border = "2px solid black";
+                        className += " score-current";
                     }
 
                     return (
                         <div
                             key={number}
-                            style={boxStyle}
+                            className={className}
                         >
                             {number}
                         </div>

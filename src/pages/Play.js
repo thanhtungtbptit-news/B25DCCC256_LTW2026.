@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect,useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Helpers from "../components/Helpers";
@@ -9,6 +9,7 @@ import { EXTRA_TIME, TIME_PER_QUESTION } from "../data";
 import { calcScore, getRank } from "../util";
 
 const Play = ({ playerName, questions, onFinishGame }) => {
+    const hasFinishedRef = useRef(false);
     const navigate = useNavigate();
 
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -28,35 +29,43 @@ const Play = ({ playerName, questions, onFinishGame }) => {
     const score = calcScore(answers);
 
     const finishGame = useCallback((reason) => {
-        const finalScore = calcScore(answers);
-        const finalRank = getRank(finalScore);
-        const finalCorrectCount = answers.filter(
-            (answer) => answer.correct
-        ).length;
 
-        const record = {
-            id: Date.now(),
-            name: playerName,
-            score: finalScore,
-            rank: finalRank,
-            correctCount: finalCorrectCount,
-            playedAt: new Date().toLocaleString("vi-VN")
-        };
+    if (hasFinishedRef.current) {
+        return;
+    }
 
-        onFinishGame(record);
-        console.log("onFinishGame:", onFinishGame);
-        console.log("Kiểu dữ liệu:", typeof onFinishGame);
+    
+    hasFinishedRef.current = true;
 
-        onFinishGame(record);
+    const finalScore = calcScore(answers);
 
-        navigate("/result", {
-            replace: true,
-            state: {
-                ...record,
-                reason
-            }
-        });
-    }, [answers, playerName, onFinishGame, navigate]);
+    const finalRank = getRank(finalScore);
+
+    const finalCorrectCount = answers.filter(
+        (answer) => answer.correct
+    ).length;
+
+    const record = {
+        id: Date.now(),
+        name: playerName,
+        score: finalScore,
+        rank: finalRank,
+        correctCount: finalCorrectCount,
+        playedAt: new Date().toLocaleString("vi-VN")
+    };
+
+   
+    onFinishGame(record);
+
+    navigate("/result", {
+        replace: true,
+        state: {
+            ...record,
+            reason
+        }
+    });
+
+}, [answers, playerName, onFinishGame, navigate]);
 
     const handleSelectAnswer = useCallback((answerIndex) => {
         if (

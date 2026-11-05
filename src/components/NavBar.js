@@ -1,28 +1,33 @@
 import { NavLink } from "react-router-dom";
 
 const NavBar = () => {
-    const getLinkStyle = ({ isActive }) => {
-        return {
-            color: isActive ? "blue" : "black",
-            textDecoration: isActive ? "underline" : "none"
-        };
-    };
-
     return (
-        <nav>
-            <NavLink to="/" end style={getLinkStyle}>
+        <nav className="app-nav">
+            <NavLink
+                to="/"
+                end
+                className={({ isActive }) =>
+                    isActive ? "nav-link active" : "nav-link"
+                }
+            >
                 Trang chủ
             </NavLink>
 
-            {" | "}
-
-            <NavLink to="/questions" style={getLinkStyle}>
+            <NavLink
+                to="/questions"
+                className={({ isActive }) =>
+                    isActive ? "nav-link active" : "nav-link"
+                }
+            >
                 Ngân hàng câu hỏi
             </NavLink>
 
-            {" | "}
-
-            <NavLink to="/history" style={getLinkStyle}>
+            <NavLink
+                to="/history"
+                className={({ isActive }) =>
+                    isActive ? "nav-link active" : "nav-link"
+                }
+            >
                 Lịch sử
             </NavLink>
         </nav>
