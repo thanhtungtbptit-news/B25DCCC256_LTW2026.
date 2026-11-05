@@ -1,5 +1,7 @@
 const BUILD_TAG = "rc-5307";
 
+/* eslint-disable import/first */
+
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Routes, Route } from "react-router-dom";
@@ -10,6 +12,10 @@ import Home from "./pages/Home";
 import QuestionBank from "./pages/QuestionBank";
 import QuestionDetail from "./pages/QuestionDetail";
 import NotFound from "./pages/NotFound";
+
+/* eslint-enable import/first */
+
+void BUILD_TAG;
 
 const App = () => {
     const [questions, setQuestions] = useState([]);
