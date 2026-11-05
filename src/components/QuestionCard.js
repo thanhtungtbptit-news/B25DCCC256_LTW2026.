@@ -1,5 +1,4 @@
 import AnswerButton from "./AnswerButton";
-
 import { LEVELS, LETTERS } from "../data";
 
 const QuestionCard = ({
@@ -7,11 +6,12 @@ const QuestionCard = ({
     questionNumber,
     status,
     selectedAnswer,
+    hiddenAnswer,
     onSelectAnswer
 }) => {
     return (
-        <div>
-            <p>
+        <div className="question-card">
+            <p className="question-info">
                 Câu {questionNumber}/15
                 {" · "}
                 {question.topic}
@@ -21,13 +21,7 @@ const QuestionCard = ({
 
             <h3>{question.question}</h3>
 
-            <div
-                style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(2, 1fr)",
-                    gap: "8px"
-                }}
-            >
+            <div className="answer-grid">
                 {question.options.map((option, index) => (
                     <AnswerButton
                         key={index}
@@ -36,6 +30,7 @@ const QuestionCard = ({
                         correctAnswer={question.answer}
                         selectedAnswer={selectedAnswer}
                         status={status}
+                        hidden={hiddenAnswer === index}
                         onClick={() => onSelectAnswer(index)}
                     />
                 ))}

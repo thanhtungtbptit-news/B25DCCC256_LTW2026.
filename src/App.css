@@ -1,38 +1,368 @@
-.App {
-  text-align: center;
+/* ==============================
+   1. GIAO DIỆN CHUNG
+============================== */
+
+.app-shell {
+    width: 92%;
+    max-width: 1100px;
+    margin: 30px auto;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.main-content {
+    background-color: #ffffff;
+    border: 1px solid #dce3eb;
+    border-radius: 8px;
+    padding: 30px;
+    margin-top: 20px;
+    min-height: 420px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+h1,
+h2 {
+    color: #1e293b;
+    text-align: center;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+h3 {
+    color: #334155;
 }
 
-.App-link {
-  color: #61dafb;
+p {
+    color: #475569;
+    line-height: 1.6;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* ==============================
+   2. THANH ĐIỀU HƯỚNG
+============================== */
+
+.app-nav {
+    background-color: #ffffff;
+    border: 1px solid #dce3eb;
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 25px;
+}
+
+.nav-link {
+    color: #334155;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 8px 12px;
+}
+
+.nav-link:hover {
+    color: #1d4ed8;
+}
+
+.nav-link.active {
+    color: #1d4ed8;
+    text-decoration: underline;
+}
+
+/* ==============================
+   3. INPUT VÀ SELECT
+============================== */
+
+input,
+select {
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    background-color: #ffffff;
+    color: #1f2937;
+    outline: none;
+}
+
+input:focus,
+select:focus {
+    border-color: #2563eb;
+}
+
+/* ==============================
+   4. BUTTON CHUNG
+============================== */
+
+button {
+    padding: 10px 16px;
+    border: 1px solid #1d4ed8;
+    border-radius: 5px;
+    background-color: #1d4ed8;
+    color: #ffffff;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+button:hover:not(:disabled) {
+    background-color: #1e40af;
+}
+
+button:disabled {
+    background-color: #cbd5e1;
+    border-color: #cbd5e1;
+    color: #64748b;
+    cursor: not-allowed;
+}
+
+/* ==============================
+   5. TRANG CHỦ
+============================== */
+
+.main-content form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 25px;
+}
+
+.main-content form label {
+    font-weight: 600;
+}
+
+/* ==============================
+   6. QUYỀN TRỢ GIÚP
+============================== */
+
+.helpers {
+    margin: 20px 0;
+    padding: 16px;
+    background-color: #f8fafc;
+    border: 1px solid #dce3eb;
+    border-radius: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.helpers h3 {
+    width: 100%;
+    text-align: center;
+    margin: 0 0 5px;
+}
+
+/* ==============================
+   7. CÂU HỎI VÀ ĐÁP ÁN
+============================== */
+
+.question-card {
+    margin: 25px 0;
+    padding: 24px;
+    background-color: #f8fafc;
+    border: 1px solid #dce3eb;
+    border-radius: 6px;
+}
+
+.question-info {
+    color: #1d4ed8;
+    font-weight: 600;
+    text-align: center;
+}
+
+.question-card h3 {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.answer-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.answer-button {
+    min-height: 55px;
+    background-color: #ffffff;
+    color: #334155;
+    border: 1px solid #cbd5e1;
+    text-align: left;
+    padding: 14px;
+}
+
+.answer-button:hover:not(:disabled) {
+    background-color: #eff6ff;
+    color: #1d4ed8;
+}
+
+.answer-button-selected {
+    background-color: #fef08a !important;
+    color: #713f12 !important;
+    border-color: #eab308 !important;
+}
+
+.answer-button-correct {
+    background-color: #bbf7d0 !important;
+    color: #14532d !important;
+    border-color: #16a34a !important;
+}
+
+.answer-button-wrong {
+    background-color: #fecaca !important;
+    color: #7f1d1d !important;
+    border-color: #dc2626 !important;
+}
+
+.answer-button-hidden {
+    visibility: hidden;
+}
+
+/* ==============================
+   8. ĐỒNG HỒ
+============================== */
+
+.timer {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1d4ed8;
+}
+
+.timer-warning {
+    color: #dc2626;
+}
+
+/* ==============================
+   9. BẢNG ĐIỂM
+============================== */
+
+.score-board {
+    margin-top: 25px;
+    padding: 18px;
+    background-color: #ffffff;
+    border: 1px solid #dce3eb;
+    border-radius: 6px;
+}
+
+.score-board h3 {
+    text-align: center;
+}
+
+.score-board-numbers {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.score-board-cell {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #e5e7eb;
+    color: #374151;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.score-correct {
+    background-color: #bbf7d0;
+    border-color: #16a34a;
+    color: #14532d;
+}
+
+.score-rescued {
+    background-color: #fed7aa;
+    border-color: #ea580c;
+    color: #7c2d12;
+}
+
+.score-current {
+    outline: 2px solid #1e293b;
+    outline-offset: 2px;
+}
+
+/* ==============================
+   10. BẢNG NGÂN HÀNG VÀ LỊCH SỬ
+============================== */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: #ffffff;
+}
+
+th,
+td {
+    padding: 12px;
+    border: 1px solid #dce3eb;
+    text-align: left;
+}
+
+th {
+    background-color: #eaf0f8;
+    color: #1e293b;
+    font-weight: 700;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #f8fafc;
+}
+
+tbody tr:hover {
+    background-color: #eff6ff;
+}
+
+td a {
+    color: #1d4ed8;
+    text-decoration: none;
+}
+
+td a:hover {
+    text-decoration: underline;
+}
+
+/* ==============================
+   11. TRANG KẾT QUẢ
+============================== */
+
+.main-content > div > button {
+    margin: 10px;
+}
+
+/* ==============================
+   12. MÀN HÌNH NHỎ
+============================== */
+
+@media (max-width: 650px) {
+    .app-shell {
+        width: 95%;
+        margin: 15px auto;
+    }
+
+    .main-content {
+        padding: 16px;
+    }
+
+    .app-nav {
+        gap: 5px;
+    }
+
+    .answer-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .helpers {
+        flex-direction: column;
+    }
+
+    table {
+        font-size: 13px;
+    }
+
+    th,
+    td {
+        padding: 7px;
+    }
 }

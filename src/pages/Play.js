@@ -1,93 +1,139 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import Helpers from "../components/Helpers";
 import QuestionCard from "../components/QuestionCard";
-import Timer from "../components/Timer";
 import ScoreBoard from "../components/ScoreBoard";
-
-import { TIME_PER_QUESTION } from "../data";
+import Timer from "../components/Timer";
+import { EXTRA_TIME, TIME_PER_QUESTION } from "../data";
 import { calcScore, getRank } from "../util";
 
-const Play = ({ playerName, questions }) => {
+const Play = ({ playerName, questions, onFinishGame }) => {
     const navigate = useNavigate();
 
     const [currentIndex, setCurrentIndex] = useState(0);
-
-    const [timeLeft, setTimeLeft] = useState(
-        TIME_PER_QUESTION
-    );
-
+    const [timeLeft, setTimeLeft] = useState(TIME_PER_QUESTION);
     const [answers, setAnswers] = useState([]);
-
     const [status, setStatus] = useState("answering");
-
     const [selectedAnswer, setSelectedAnswer] = useState(null);
-
     const [endReason, setEndReason] = useState("");
 
-    const currentQuestion = questions[currentIndex];
+    const [hiddenAnswer, setHiddenAnswer] = useState(null);
+    const [usedFiftyFifty, setUsedFiftyFifty] = useState(false);
+    const [usedExtraTime, setUsedExtraTime] = useState(false);
+    const [usedLifebuoy, setUsedLifebuoy] = useState(false);
+    const [lifebuoyActive, setLifebuoyActive] = useState(false);
 
+    const currentQuestion = questions[currentIndex];
     const score = calcScore(answers);
 
-    // Tính số câu trả lời đúng
-    const correctCount = answers.filter(
-        (answer) => answer.correct
-    ).length;
-
-    // Hàm kết thúc lượt chơi
     const finishGame = useCallback((reason) => {
         const finalScore = calcScore(answers);
         const finalRank = getRank(finalScore);
-
         const finalCorrectCount = answers.filter(
             (answer) => answer.correct
         ).length;
 
+        const record = {
+            id: Date.now(),
+            name: playerName,
+            score: finalScore,
+            rank: finalRank,
+            correctCount: finalCorrectCount,
+            playedAt: new Date().toLocaleString("vi-VN")
+        };
+
+        onFinishGame(record);
+        console.log("onFinishGame:", onFinishGame);
+        console.log("Kiểu dữ liệu:", typeof onFinishGame);
+
+        onFinishGame(record);
+
         navigate("/result", {
             replace: true,
             state: {
-                name: playerName,
-                score: finalScore,
-                rank: finalRank,
-                correctCount: finalCorrectCount,
-                reason: reason
+                ...record,
+                reason
             }
         });
-    }, [answers, navigate, playerName]);
+    }, [answers, playerName, onFinishGame, navigate]);
 
-   
-    const handleSelectAnswer = (answerIndex) => {
-        if (status !== "answering") {
+    const handleSelectAnswer = useCallback((answerIndex) => {
+        if (
+            status !== "answering"
+            || answerIndex === hiddenAnswer
+            || !currentQuestion
+        ) {
             return;
         }
 
-        const isCorrect =
-            answerIndex === currentQuestion.answer;
+        const isCorrect = answerIndex === currentQuestion.answer;
 
         setSelectedAnswer(answerIndex);
-
-        setAnswers((prevAnswers) => [
-            ...prevAnswers,
+        setAnswers((previousAnswers) => [
+            ...previousAnswers,
             {
                 id: currentQuestion.id,
                 level: currentQuestion.level,
-                correct: isCorrect
+                correct: isCorrect,
+                rescued: !isCorrect && lifebuoyActive
             }
         ]);
 
-        setStatus("locked");
-    };
+        if (isCorrect) {
+            setEndReason("correct");
+        } else if (lifebuoyActive) {
+            setEndReason("rescued");
+        } else {
+            setEndReason("wrong");
+        }
 
-   
-    useEffect(() => {
-        if (status !== "answering") {
+        setStatus("locked");
+    }, [status, hiddenAnswer, currentQuestion, lifebuoyActive]);
+
+    const handleFiftyFifty = () => {
+        if (status !== "answering" || usedFiftyFifty) {
             return;
         }
 
+        const wrongAnswers = currentQuestion.options
+            .map((option, index) => index)
+            .filter((index) => index !== currentQuestion.answer);
+
+        const randomIndex = Math.floor(
+            Math.random() * wrongAnswers.length
+        );
+
+        setHiddenAnswer(wrongAnswers[randomIndex]);
+        setUsedFiftyFifty(true);
+    };
+
+    const handleExtraTime = () => {
+        if (status !== "answering" || usedExtraTime) {
+            return;
+        }
+
+        setTimeLeft((previousTime) => previousTime + EXTRA_TIME);
+        setUsedExtraTime(true);
+    };
+
+    const handleLifebuoy = () => {
+        if (status !== "answering" || usedLifebuoy) {
+            return;
+        }
+
+        setUsedLifebuoy(true);
+        setLifebuoyActive(true);
+    };
+
+    // Đồng hồ chỉ chạy khi người chơi đang trả lời.
+    useEffect(() => {
+        if (status !== "answering") {
+            return undefined;
+        }
+
         const interval = setInterval(() => {
-            setTimeLeft((previousTime) =>
-                Math.max(previousTime - 1, 0)
-            );
+            setTimeLeft((previousTime) => Math.max(previousTime - 1, 0));
         }, 1000);
 
         return () => {
@@ -95,24 +141,28 @@ const Play = ({ playerName, questions }) => {
         };
     }, [status]);
 
+    // Hết giờ: lộ đáp án ngay; phao cho phép sang câu tiếp theo.
     useEffect(() => {
-        if (status === "answering" && timeLeft === 0) {
-            setAnswers((prevAnswers) => [
-                ...prevAnswers,
-                {
-                    id: currentQuestion.id,
-                    level: currentQuestion.level,
-                    correct: false
-                }
-            ]);
-
-            setSelectedAnswer(null);
-            setEndReason("timeout");
-            setStatus("revealed");
+        if (status !== "answering" || timeLeft !== 0 || !currentQuestion) {
+            return;
         }
-    }, [timeLeft, status, currentQuestion]);
 
-  
+        setAnswers((previousAnswers) => [
+            ...previousAnswers,
+            {
+                id: currentQuestion.id,
+                level: currentQuestion.level,
+                correct: false,
+                rescued: lifebuoyActive
+            }
+        ]);
+
+        setSelectedAnswer(null);
+        setEndReason(lifebuoyActive ? "timeoutRescued" : "timeout");
+        setStatus("revealed");
+    }, [timeLeft, status, currentQuestion, lifebuoyActive]);
+
+    // Chờ 2 giây để lộ kết quả; sau đó chờ thêm 1,5 giây.
     useEffect(() => {
         let timeout;
 
@@ -124,52 +174,96 @@ const Play = ({ playerName, questions }) => {
 
         if (status === "revealed") {
             timeout = setTimeout(() => {
+                if (endReason === "wrong") {
+                    finishGame("wrong");
+                    return;
+                }
 
-           
                 if (endReason === "timeout") {
                     finishGame("timeout");
                     return;
                 }
 
-         
-                if (
-                    selectedAnswer !== currentQuestion.answer
-                ) {
-                    finishGame("wrong");
+                const isLastQuestion = currentIndex === questions.length - 1;
+
+                if (isLastQuestion) {
+                    const hasRescuedAnswer = answers.some(
+                        (answer) => answer.rescued
+                    );
+
+                    if (
+                        endReason === "rescued"
+                        || endReason === "timeoutRescued"
+                        || hasRescuedAnswer
+                    ) {
+                        finishGame("completed");
+                    } else {
+                        finishGame("win");
+                    }
+
                     return;
                 }
 
-                
-                if (currentIndex === questions.length - 1) {
-                    finishGame("win");
-                    return;
-                }
-
-                setCurrentIndex((previousIndex) =>
-                    previousIndex + 1
-                );
-
+                setCurrentIndex((previousIndex) => previousIndex + 1);
                 setTimeLeft(TIME_PER_QUESTION);
                 setSelectedAnswer(null);
+                setHiddenAnswer(null);
+                setLifebuoyActive(false);
                 setEndReason("");
                 setStatus("answering");
-
             }, 1500);
         }
 
         return () => {
             clearTimeout(timeout);
         };
-
     }, [
         status,
         endReason,
-        selectedAnswer,
-        currentQuestion,
         currentIndex,
         questions.length,
+        answers,
         finishGame
     ]);
+
+    // Phím 1, 2, 3, 4 tương ứng A, B, C, D.
+    useEffect(() => {
+        if (status !== "answering") {
+            return undefined;
+        }
+
+        const handleKey = (event) => {
+            if (!["1", "2", "3", "4"].includes(event.key)) {
+                return;
+            }
+
+            const answerIndex = Number(event.key) - 1;
+
+            if (answerIndex === hiddenAnswer) {
+                return;
+            }
+
+            handleSelectAnswer(answerIndex);
+        };
+
+        window.addEventListener("keydown", handleKey);
+
+        return () => {
+            window.removeEventListener("keydown", handleKey);
+        };
+    }, [status, hiddenAnswer, handleSelectAnswer]);
+
+    // Cập nhật tiêu đề tab trong lúc thi.
+    useEffect(() => {
+        document.title = `Câu ${currentIndex + 1}/15 – ${score} điểm`;
+    }, [currentIndex, score]);
+
+    // Khôi phục tiêu đề khi rời màn hình thi.
+    useEffect(() => {
+        return () => {
+            document.title = "Rung chuông vàng";
+        };
+    }, []);
 
     if (!currentQuestion) {
         return <p>Không có câu hỏi để hiển thị.</p>;
@@ -181,11 +275,23 @@ const Play = ({ playerName, questions }) => {
 
             <Timer timeLeft={timeLeft} />
 
+            <Helpers
+                status={status}
+                usedFiftyFifty={usedFiftyFifty}
+                usedExtraTime={usedExtraTime}
+                usedLifebuoy={usedLifebuoy}
+                lifebuoyActive={lifebuoyActive}
+                onFiftyFifty={handleFiftyFifty}
+                onExtraTime={handleExtraTime}
+                onLifebuoy={handleLifebuoy}
+            />
+
             <QuestionCard
                 question={currentQuestion}
                 questionNumber={currentIndex + 1}
                 status={status}
                 selectedAnswer={selectedAnswer}
+                hiddenAnswer={hiddenAnswer}
                 onSelectAnswer={handleSelectAnswer}
             />
 
@@ -194,8 +300,6 @@ const Play = ({ playerName, questions }) => {
                 currentIndex={currentIndex}
                 score={score}
             />
-
-            <p>Số câu trả lời đúng: {correctCount}</p>
         </div>
     );
 };

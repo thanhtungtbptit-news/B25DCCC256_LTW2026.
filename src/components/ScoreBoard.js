@@ -10,7 +10,7 @@ const ScoreBoard = ({
 
     return (
         <div>
-            <p>Điểm: {score}</p>
+            <p>Điểm: {score}</p>    
 
             <div
                 style={{

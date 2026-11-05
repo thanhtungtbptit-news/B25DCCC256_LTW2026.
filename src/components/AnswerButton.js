@@ -4,33 +4,34 @@ const AnswerButton = ({
     correctAnswer,
     selectedAnswer,
     status,
+    hidden,
     onClick
 }) => {
-    const buttonStyle = {};
+    let className = "answer-button";
 
-    if (
+    if (hidden) {
+        className += " answer-button-hidden";
+    } else if (
         status === "locked" &&
         selectedAnswer === index
     ) {
-        buttonStyle.backgroundColor = "yellow";
-    }
-
-    if (status === "revealed") {
+        className += " answer-button-selected";
+    } else if (status === "revealed") {
         if (index === correctAnswer) {
-            buttonStyle.backgroundColor = "green";
+            className += " answer-button-correct";
         } else if (index === selectedAnswer) {
-            buttonStyle.backgroundColor = "red";
+            className += " answer-button-wrong";
         }
     }
 
     return (
         <button
             type="button"
-            style={buttonStyle}
-            disabled={status !== "answering"}
+            className={className}
+            disabled={status !== "answering" || hidden}
             onClick={onClick}
         >
-            {label}
+            {hidden ? "\u00A0" : label}
         </button>
     );
 };
