@@ -4,7 +4,12 @@ const BUILD_TAG = "rc-5307";
 
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Routes, Route } from "react-router-dom";
+
+import {
+    Routes,
+    Route,
+    Navigate
+} from "react-router-dom";
 
 import Layout from "./components/Layout";
 
@@ -12,6 +17,8 @@ import Home from "./pages/Home";
 import QuestionBank from "./pages/QuestionBank";
 import QuestionDetail from "./pages/QuestionDetail";
 import NotFound from "./pages/NotFound";
+import Play from "./pages/Play";
+import Result from "./pages/Result";
 
 /* eslint-enable import/first */
 
@@ -19,8 +26,12 @@ void BUILD_TAG;
 
 const App = () => {
     const [questions, setQuestions] = useState([]);
+
     const [loading, setLoading] = useState(true);
+
     const [error, setError] = useState(false);
+
+    const [playerName, setPlayerName] = useState("");
 
     useEffect(() => {
         const controller = new AbortController();
@@ -57,12 +68,19 @@ const App = () => {
         };
     }, []);
 
-
     return (
         <Routes>
             <Route path="/" element={<Layout />}>
 
-                <Route index element={<Home />} />
+                <Route
+                    index
+                    element={
+                        <Home
+                            playerName={playerName}
+                            setPlayerName={setPlayerName}
+                        />
+                    }
+                />
 
                 <Route
                     path="questions"
@@ -92,12 +110,25 @@ const App = () => {
 
                 <Route
                     path="play"
-                    element={<h2>Màn hình thi</h2>}
+                    element={
+                        playerName.trim() === "" ? (
+                            <Navigate to="/" replace />
+                        ) : loading ? (
+                            <p>Đang tải câu hỏi...</p>
+                        ) : error ? (
+                            <p>Không tải được câu hỏi.</p>
+                        ) : (
+                            <Play
+                                playerName={playerName}
+                                questions={questions}
+                            />
+                        )
+                    }
                 />
 
                 <Route
                     path="result"
-                    element={<h2>Kết quả lượt chơi</h2>}
+                    element={<Result />}
                 />
 
                 <Route
